@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>WOYZ Academy</title>
+<title>OEs Academy</title>
 <meta name="theme-color" content="#12213D">
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIldPWVogQWNhZGVteSIsICJzaG9ydF9uYW1lIjogIldPWVogQWNhZGVteSIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjVFRkUwIiwgInRoZW1lX2NvbG9yIjogIiMxMjIxM0QifQ==">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT0VzIEFjYWRlbXkiLCJzaG9ydF9uYW1lIjoiT0VzIEFjYWRlbXkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0Y1RUZFMCIsInRoZW1lX2NvbG9yIjoiIzEyMjEzRCJ9">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -112,6 +112,8 @@
     background:transparent; color:var(--ink); font-size:15px; margin-top:10px;
   }
   .login-error{ color:var(--red-dark); font-size:14px; margin:10px 0 0; text-align:center; min-height:16px; }
+  .login-switch{ text-align:center; color:var(--ink-muted); font-size:14px; margin:18px 0 0; }
+  .login-switch button{ background:none; border:none; color:var(--red); padding:0; font-size:14px; text-decoration:underline; }
 
   /* ---------- Dashboard ---------- */
   .greeting{ margin-bottom:26px; }
@@ -154,6 +156,7 @@
     cursor:pointer; transition:border-color .15s;
   }
   .course-row:hover{ border-color:var(--line-strong); }
+  .course-row.locked{ opacity:.86; }
   .course-thumb{
     width:44px; height:44px; border-radius:8px; flex-shrink:0;
     background:var(--cream-2); display:flex; align-items:center; justify-content:center;
@@ -164,12 +167,21 @@
   .course-info .meta{ font-size:14px; color:var(--ink-muted); margin:0 0 8px; }
   .progress-track{ height:5px; border-radius:3px; background:var(--cream-2); overflow:hidden; }
   .progress-fill{ height:100%; background:var(--red); border-radius:3px; }
+  .access-badge{
+    display:inline-flex; align-items:center; height:22px; padding:0 8px; border-radius:999px;
+    font-size:12px; font-weight:700; letter-spacing:.02em;
+    background:rgba(173,138,78,.18); color:var(--red-dark); margin-left:8px;
+  }
 
   .btn-outline{
     height:34px; padding:0 14px; border:1px solid var(--line-strong); border-radius:7px;
     background:transparent; font-size:15px; color:var(--ink); flex-shrink:0;
   }
   .btn-outline:hover{ border-color:var(--navy); }
+  .btn-logout{
+    height:32px; padding:0 12px; border:1px solid var(--line-strong); border-radius:7px;
+    background:transparent; color:var(--ink); font-size:14px;
+  }
 
   /* ================= COURSE PLAYER VIEW ================= */
   .player-topbar{
@@ -251,6 +263,16 @@
   .certificate-sheet h1{ font-size:32px; margin:0 0 12px; }
   .certificate-sheet h2{ font-size:22px; margin:10px 0; }
   .certificate-sheet p{ color:var(--ink-muted); margin:8px auto; max-width:520px; }
+
+  .locked-panel{
+    max-width:680px; background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; margin:0 auto;
+  }
+  .locked-panel h1{ font-size:28px; margin:0 0 10px; }
+  .locked-panel p{ color:var(--ink-muted); font-size:16px; margin:0 0 14px; }
+  .locked-panel .price{ color:var(--ink); font-size:24px; font-family:'Playfair Display',serif; margin:12px 0; }
+  .locked-panel ul{ margin:14px 0 20px; padding-left:20px; color:var(--ink-muted); }
+  .locked-panel li{ margin:6px 0; }
 
   .player-sidebar{
     background:#fff; border-right:1px solid var(--line);
@@ -339,8 +361,8 @@
 <!-- ================= LOGIN VIEW ================= -->
 <div id="view-login" class="login-wrap">
   <div class="login-card">
-    <div class="login-mark">WA</div>
-    <h1>WOYZ Academy</h1>
+    <div class="login-mark">OA</div>
+    <h1>OEs Academy</h1>
     <p class="login-sub" id="login-sub">Sign in to continue your learning</p>
 
     <div class="field">
@@ -354,6 +376,10 @@
     <button class="btn-primary" id="btn-signin">Sign in</button>
     <button class="btn-secondary" id="btn-demo">Continue with demo account</button>
     <p class="login-error" id="login-error"></p>
+    <p class="login-switch">
+      <span id="auth-mode-copy">New learner?</span>
+      <button id="btn-auth-mode" type="button">Create an account</button>
+    </p>
   </div>
 </div>
 
@@ -364,8 +390,8 @@
   <div id="view-dashboard">
     <div class="topbar">
       <div class="brand">
-        <div class="mark">WA</div>
-        <span class="name serif">WOYZ Academy</span>
+        <div class="mark">OA</div>
+        <span class="name serif">OEs Academy</span>
       </div>
       <div class="topbar-right">
         <button class="icon-btn" id="btn-search" aria-label="Search">
@@ -375,6 +401,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         </button>
         <div class="avatar" id="user-avatar">GK</div>
+        <button class="btn-logout" id="btn-logout">Sign out</button>
       </div>
     </div>
 
@@ -404,7 +431,7 @@
   <div id="view-course" class="hidden">
     <div class="player-topbar">
       <div class="p-left">
-        <div class="mark">WA</div>
+        <div class="mark">OA</div>
         <span class="ptitle" id="p-course-title">Course title</span>
       </div>
       <div class="p-center" id="p-progress-text">0% completed (0/0)</div>
@@ -445,6 +472,7 @@
           </div>
         </div>
         <div id="certificate-panel" class="certificate-panel hidden"></div>
+        <div id="locked-panel" class="locked-panel hidden"></div>
       </div>
     </div>
   </div>
@@ -454,15 +482,15 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ---------------------------------------------------------------
-   TODO: replace with your WOYZ Academy Firebase web config
-   (Firebase console -> Project settings -> your WOYZ Academy project -> your web app)
+   TODO: replace with your OEs Academy Firebase web config
+   (Firebase console -> Project settings -> your OEs Academy project -> your web app)
 --------------------------------------------------------------- */
 const firebaseConfig = {
   apiKey: "REPLACE_ME",
@@ -471,6 +499,17 @@ const firebaseConfig = {
   storageBucket: "REPLACE_ME.appspot.com",
   messagingSenderId: "REPLACE_ME",
   appId: "REPLACE_ME"
+};
+
+const adminEmails = [
+  "demo@oesacademy.local"
+  // Add your admin email here after Firebase Auth is connected.
+];
+
+const checkoutConfig = {
+  provider: "stripe-or-razorpay",
+  enabled: false,
+  checkoutEndpoint: "REPLACE_WITH_CLOUD_FUNCTION_URL"
 };
 
 let auth, db, firebaseReady = false;
@@ -502,6 +541,9 @@ const sampleCourses = [
   {
     id: "aidc",
     title: "AI for Indian Doctors And Clinics (AIDC)",
+    price: "₹14,999",
+    accessLabel: "Subscription required",
+    description: "Practical AI training for doctors, clinics, frontdesk teams, and healthcare operators.",
     sections: [
       {
         title: "Foundation, Mindset and Governance",
@@ -586,34 +628,54 @@ const sampleCourses = [
 
 let progressState = {};   // { courseId: { done: {"sectionIdx-lessonIdx": true} } }
 let videoMap = {};        // { courseId: { "sectionIdx-lessonIdx": "vimeoId" } }
+let enrollmentState = {}; // { courseId: { status: "active", accessUntil?: "YYYY-MM-DD" } }
 let currentUser = null;
 let currentCourse = null;
 let currentLesson = { s: 0, l: 0 };
 let openSection = 0;
 let adminMode = false;
+let authMode = "signin";
 let activeTab = "lessons";
 let editingLesson = null; // "sectionIdx-lessonIdx" of the lesson currently showing its input row, or null
 
 const $ = (id) => document.getElementById(id);
 
 /* ---------------- Auth wiring ---------------- */
+function setAuthMode(mode) {
+  authMode = mode;
+  $("btn-signin").textContent = mode === "signup" ? "Create account" : "Sign in";
+  $("login-sub").textContent = mode === "signup" ? "Create your OEs Academy account" : (firebaseReady ? "Sign in to continue your learning" : "Demo mode — Firebase not yet connected");
+  $("auth-mode-copy").textContent = mode === "signup" ? "Already registered?" : "New learner?";
+  $("btn-auth-mode").textContent = mode === "signup" ? "Sign in" : "Create an account";
+}
+
 $("btn-signin").addEventListener("click", async () => {
   const email = $("email").value.trim();
   const password = $("password").value;
   $("login-error").textContent = "";
   if (!email || !password) { $("login-error").textContent = "Enter your email and password."; return; }
   if (!firebaseReady) { $("login-error").textContent = "Firebase isn't configured yet — use the demo account below."; return; }
-  try { await signInWithEmailAndPassword(auth, email, password); }
-  catch (e) { $("login-error").textContent = "Couldn't sign in. Check your email and password."; }
+  try {
+    if (authMode === "signup") await createUserWithEmailAndPassword(auth, email, password);
+    else await signInWithEmailAndPassword(auth, email, password);
+  }
+  catch (e) {
+    $("login-error").textContent = authMode === "signup"
+      ? "Couldn't create the account. Check the email and use a stronger password."
+      : "Couldn't sign in. Check your email and password.";
+  }
+});
+
+$("btn-auth-mode").addEventListener("click", () => {
+  $("login-error").textContent = "";
+  setAuthMode(authMode === "signup" ? "signin" : "signup");
 });
 
 $("btn-demo").addEventListener("click", async () => {
   $("login-error").textContent = "";
-  if (firebaseReady) {
-    try { await signInAnonymously(auth); return; } catch (e) { console.warn(e); }
-  }
-  currentUser = { uid: "local-demo", email: "demo@woyzacademy.local" };
+  currentUser = { uid: "local-demo", email: "demo@oesacademy.local" };
   loadLocalProgress();
+  loadLocalEnrollments();
   enterApp();
 });
 
@@ -622,6 +684,7 @@ if (firebaseReady) {
     if (user) {
       currentUser = user;
       await loadProgress(user.uid);
+      await loadEnrollments(user.uid);
       enterApp();
     } else {
       currentUser = null;
@@ -630,6 +693,17 @@ if (firebaseReady) {
     }
   });
 }
+
+$("btn-logout").addEventListener("click", async () => {
+  currentUser = null;
+  currentCourse = null;
+  adminMode = false;
+  if (firebaseReady && auth && auth.currentUser) {
+    try { await signOut(auth); return; } catch (e) { console.warn(e); }
+  }
+  $("view-app").classList.add("hidden");
+  $("view-login").classList.remove("hidden");
+});
 
 async function loadProgress(uid) {
   progressState = {};
@@ -640,7 +714,7 @@ async function loadProgress(uid) {
   } catch (e) { console.warn("Falling back to local progress", e); loadLocalProgress(); }
 }
 function loadLocalProgress() {
-  try { progressState = JSON.parse(localStorage.getItem("woyz_progress") || "{}"); }
+  try { progressState = JSON.parse(localStorage.getItem("oes_progress") || "{}"); }
   catch (e) { progressState = {}; }
 }
 async function saveProgress() {
@@ -648,29 +722,70 @@ async function saveProgress() {
     try { await setDoc(doc(db, "progress", currentUser.uid), progressState); return; }
     catch (e) { console.warn("Couldn't save to Firestore, saving locally instead", e); }
   }
-  localStorage.setItem("woyz_progress", JSON.stringify(progressState));
+  localStorage.setItem("oes_progress", JSON.stringify(progressState));
 }
 
-/* videoMap is shared across everyone (it's course content, not personal
-   progress), so it's stored under one fixed document rather than per-uid. */
+async function loadEnrollments(uid) {
+  enrollmentState = {};
+  if (!db) return loadLocalEnrollments();
+  try {
+    await Promise.all(sampleCourses.map(async course => {
+      const snap = await getDoc(doc(db, "enrollments", uid + "_" + course.id));
+      if (snap.exists()) enrollmentState[course.id] = snap.data();
+    }));
+  } catch (e) {
+    console.warn("Falling back to local enrollments", e);
+    loadLocalEnrollments();
+  }
+}
+function loadLocalEnrollments() {
+  enrollmentState = {};
+  if (currentUser && currentUser.uid === "local-demo") {
+    sampleCourses.forEach(course => {
+      enrollmentState[course.id] = { status: "active", source: "demo" };
+    });
+    return;
+  }
+  try { enrollmentState = JSON.parse(localStorage.getItem("oes_enrollments") || "{}"); }
+  catch (e) { enrollmentState = {}; }
+}
+function hasCourseAccess(courseId) {
+  const enrollment = enrollmentState[courseId];
+  if (!enrollment || enrollment.status !== "active") return false;
+  if (!enrollment.accessUntil) return true;
+  return new Date(enrollment.accessUntil).getTime() >= Date.now();
+}
+function isAdminUser() {
+  const email = (currentUser && currentUser.email || "").toLowerCase();
+  return adminEmails.map(item => item.toLowerCase()).includes(email);
+}
+
+/* Vimeo IDs are stored per-course so Firestore rules can limit reads to
+   enrolled learners and writes to admins. */
 async function loadVideoMap() {
   videoMap = {};
   if (!db) return loadLocalVideoMap();
   try {
-    const snap = await getDoc(doc(db, "videoMap", "shared"));
-    if (snap.exists()) videoMap = snap.data();
+    await Promise.all(sampleCourses.map(async course => {
+      if (!hasCourseAccess(course.id) && !isAdminUser()) return;
+      const snap = await getDoc(doc(db, "videoMap", course.id));
+      if (snap.exists()) videoMap[course.id] = snap.data();
+    }));
   } catch (e) { console.warn("Falling back to local video map", e); loadLocalVideoMap(); }
 }
 function loadLocalVideoMap() {
-  try { videoMap = JSON.parse(localStorage.getItem("woyz_videomap") || "{}"); }
+  try { videoMap = JSON.parse(localStorage.getItem("oes_videomap") || "{}"); }
   catch (e) { videoMap = {}; }
 }
 async function saveVideoMap() {
   if (db) {
-    try { await setDoc(doc(db, "videoMap", "shared"), videoMap); return; }
+    try {
+      await Promise.all(Object.keys(videoMap).map(courseId => setDoc(doc(db, "videoMap", courseId), videoMap[courseId])));
+      return;
+    }
     catch (e) { console.warn("Couldn't save video map to Firestore, saving locally instead", e); }
   }
-  localStorage.setItem("woyz_videomap", JSON.stringify(videoMap));
+  localStorage.setItem("oes_videomap", JSON.stringify(videoMap));
 }
 function getVimeoId(courseId, s, l, fallback) {
   const map = videoMap[courseId];
@@ -691,6 +806,7 @@ async function enterApp() {
   const emailStr = currentUser.email || "you";
   $("user-avatar").textContent = emailStr.slice(0,2).toUpperCase();
   $("greeting-text").textContent = "Good to see you, " + emailStr.split("@")[0];
+  $("btn-admin").classList.toggle("hidden", !isAdminUser());
   await loadVideoMap();
   renderDashboard();
 }
@@ -712,7 +828,7 @@ function userStorageSuffix() {
 }
 
 function notesStorageKey(courseId, s, l) {
-  return "woyz_notes_" + userStorageSuffix() + "_" + courseId + "_" + lessonKey(s, l);
+  return "oes_notes_" + userStorageSuffix() + "_" + courseId + "_" + lessonKey(s, l);
 }
 
 function loadLessonNote(courseId, s, l) {
@@ -737,23 +853,24 @@ function renderDashboard() {
   let inProgress = 0, certs = 0, totalDoneAll = 0;
 
   sampleCourses.forEach(course => {
+    const access = hasCourseAccess(course.id);
     const total = totalLessons(course);
     const done = doneLessons(course);
-    totalDoneAll += done;
-    if (done > 0 && done < total) inProgress++;
-    if (done === total) certs++;
+    if (access) totalDoneAll += done;
+    if (access && done > 0 && done < total) inProgress++;
+    if (access && done === total) certs++;
     const pct = Math.round((done/total)*100);
 
     const row = document.createElement("div");
-    row.className = "course-row";
+    row.className = "course-row" + (access ? "" : " locked");
     row.innerHTML = `
       <div class="course-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
       <div class="course-info">
-        <p class="title">${course.title}</p>
-        <p class="meta">${done} of ${total} lessons complete</p>
-        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <p class="title">${course.title}${access ? "" : `<span class="access-badge">Locked</span>`}</p>
+        <p class="meta">${access ? done + " of " + total + " lessons complete" : course.accessLabel + " · " + course.price}</p>
+        <div class="progress-track"><div class="progress-fill" style="width:${access ? pct : 0}%"></div></div>
       </div>
-      <button class="btn-outline">${done === 0 ? "Start" : (done === total ? "Review" : "Resume")}</button>
+      <button class="btn-outline">${access ? (done === 0 ? "Start" : (done === total ? "Review" : "Resume")) : "Subscribe"}</button>
     `;
     row.addEventListener("click", () => openCourse(course.id));
     list.appendChild(row);
@@ -818,6 +935,12 @@ function findFirstIncomplete(course) {
 function openCourse(courseId, lessonSection, lessonIndex) {
   currentCourse = sampleCourses.find(c => c.id === courseId);
   if (!currentCourse) return;
+  if (!hasCourseAccess(courseId)) {
+    renderLockedCourse(currentCourse);
+    $("view-dashboard").classList.add("hidden");
+    $("view-course").classList.remove("hidden");
+    return;
+  }
   currentLesson = Number.isInteger(lessonSection) && Number.isInteger(lessonIndex)
     ? { s: lessonSection, l: lessonIndex }
     : findFirstIncomplete(currentCourse);
@@ -826,6 +949,50 @@ function openCourse(courseId, lessonSection, lessonIndex) {
   renderCoursePlayer();
   $("view-dashboard").classList.add("hidden");
   $("view-course").classList.remove("hidden");
+}
+
+function renderLockedCourse(course) {
+  $("p-course-title").textContent = course.title;
+  $("p-progress-text").textContent = "Subscription required";
+  $("accordion-root").innerHTML = "";
+  $("lesson-panel").classList.add("hidden");
+  $("certificate-panel").classList.add("hidden");
+  $("locked-panel").classList.remove("hidden");
+  $("locked-panel").innerHTML = `
+    <h1 class="serif">${course.title}</h1>
+    <p>${course.description || "Subscribe to unlock this course."}</p>
+    <p class="price">${course.price}</p>
+    <ul>
+      <li>${totalLessons(course)} video lessons</li>
+      <li>Private notes and progress tracking</li>
+      <li>Certificate unlocked after completion</li>
+      <li>Vimeo-hosted lessons embedded inside the LMS</li>
+    </ul>
+    <button class="lesson-action primary" id="btn-checkout">Subscribe and unlock</button>
+    <p class="notes-hint" id="checkout-hint">Payment checkout is not connected yet. Add Stripe or Razorpay backend to activate this button.</p>
+  `;
+  $("btn-checkout").addEventListener("click", () => startCheckout(course.id));
+}
+
+async function startCheckout(courseId) {
+  if (!checkoutConfig.enabled || checkoutConfig.checkoutEndpoint.includes("REPLACE")) {
+    $("checkout-hint").textContent = "Checkout backend is not connected yet. Next step: create a Cloud Function that starts Stripe/Razorpay checkout and writes enrollment after webhook confirmation.";
+    return;
+  }
+  $("checkout-hint").textContent = "Opening secure checkout...";
+  try {
+    const response = await fetch(checkoutConfig.checkoutEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ courseId, uid: currentUser.uid })
+    });
+    const data = await response.json();
+    if (data.url) window.location.href = data.url;
+    else $("checkout-hint").textContent = "Checkout did not return a payment URL.";
+  } catch (e) {
+    console.warn(e);
+    $("checkout-hint").textContent = "Checkout could not be started.";
+  }
 }
 
 function selectLesson(s, l) {
@@ -858,6 +1025,8 @@ function moveLesson(delta) {
 
 function renderCoursePlayer() {
   const course = currentCourse;
+  $("locked-panel").classList.add("hidden");
+  $("lesson-panel").classList.remove("hidden");
   const total = totalLessons(course);
   const done = doneLessons(course);
   const pct = Math.round((done/total)*100);
@@ -979,7 +1148,7 @@ function renderCertificatePanel() {
   $("certificate-panel").innerHTML = `
     <div class="certificate-sheet">
       <p class="eyebrow">${completed ? "Certificate of Completion" : "Certificate Locked"}</p>
-      <h1 class="serif">WOYZ Academy</h1>
+      <h1 class="serif">OEs Academy</h1>
       <p>This certifies that</p>
       <h2 class="serif">${name}</h2>
       <p>${completed ? "has completed" : "is working through"} the course</p>
