@@ -118,6 +118,25 @@
   .greeting h1{ font-size:28px; margin:0 0 4px; }
   .greeting p{ color:var(--ink-muted); margin:0; font-size:16px; }
 
+  .search-panel{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin:-8px 0 26px;
+  }
+  .search-panel input{
+    width:100%; height:42px; padding:0 12px;
+    border:1px solid var(--line-strong); border-radius:8px;
+    font-size:16px; background:#fff; color:var(--ink);
+  }
+  .search-panel input:focus{ outline:none; border-color:var(--navy); box-shadow:0 0 0 3px rgba(18,33,61,0.08); }
+  .search-results{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .search-result{
+    border:1px solid var(--line); border-radius:8px; background:var(--cream);
+    padding:10px 12px; text-align:left; display:block; width:100%; color:var(--ink);
+  }
+  .search-result strong{ display:block; font-size:15px; margin-bottom:2px; }
+  .search-result span{ display:block; font-size:13.5px; color:var(--ink-muted); }
+  .empty-state{ color:var(--ink-muted); font-size:14px; margin:0; }
+
   .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:32px; }
   .stat{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; }
   .stat .label{ font-size:14px; color:var(--ink-muted); margin:0 0 6px; }
@@ -201,6 +220,38 @@
   .lesson-heading{ font-size:23px; margin:0 0 6px; }
   .lesson-desc{ font-size:15.5px; color:var(--ink-muted); margin:0; max-width:560px; }
 
+  .lesson-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:18px 0; }
+  .lesson-action{
+    height:36px; padding:0 14px; border-radius:7px; border:1px solid var(--line-strong);
+    background:#fff; color:var(--ink); font-size:14.5px;
+  }
+  .lesson-action.primary{ background:var(--navy); border-color:var(--navy); color:var(--cream); }
+  .lesson-action:disabled{ opacity:.45; cursor:not-allowed; }
+  .notes-panel{
+    border-top:1px solid var(--line); padding-top:18px; margin-top:20px;
+    max-width:680px;
+  }
+  .notes-panel label{ display:block; font-size:14px; color:var(--ink-muted); margin-bottom:8px; }
+  .notes-panel textarea{
+    width:100%; min-height:120px; resize:vertical; padding:12px;
+    border:1px solid var(--line-strong); border-radius:8px;
+    font:15px/1.4 'Source Sans 3', sans-serif; color:var(--ink); background:#fff;
+  }
+  .notes-panel textarea:focus{ outline:none; border-color:var(--navy); box-shadow:0 0 0 3px rgba(18,33,61,0.08); }
+  .notes-hint{ color:var(--ink-muted); font-size:13px; margin:8px 0 0; }
+
+  .certificate-panel{
+    max-width:720px; background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; margin:0 auto;
+  }
+  .certificate-sheet{
+    border:2px solid var(--gold); padding:30px 24px; text-align:center; background:var(--cream);
+  }
+  .certificate-sheet .eyebrow{ color:var(--red); text-transform:uppercase; letter-spacing:.08em; font-size:13px; font-weight:700; margin:0 0 10px; }
+  .certificate-sheet h1{ font-size:32px; margin:0 0 12px; }
+  .certificate-sheet h2{ font-size:22px; margin:10px 0; }
+  .certificate-sheet p{ color:var(--ink-muted); margin:8px auto; max-width:520px; }
+
   .player-sidebar{
     background:#fff; border-right:1px solid var(--line);
     padding:20px 0; min-height:100%;
@@ -272,6 +323,15 @@
     .app{ padding:24px 16px 60px; }
     .player-main{ padding:16px; }
   }
+
+  @media print{
+    body{ background:#fff; }
+    .player-topbar,.player-sidebar,#lesson-panel,.lesson-actions{ display:none !important; }
+    .player-body{ display:block; }
+    .player-main{ padding:0; }
+    .certificate-panel{ border:none; max-width:none; padding:0; margin:0; }
+    .certificate-sheet{ min-height:90vh; display:flex; flex-direction:column; justify-content:center; }
+  }
 </style>
 </head>
 <body>
@@ -308,7 +368,7 @@
         <span class="name serif">WOYZ Academy</span>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn" aria-label="Search">
+        <button class="icon-btn" id="btn-search" aria-label="Search">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
         <button class="icon-btn" aria-label="Notifications">
@@ -318,11 +378,16 @@
       </div>
     </div>
 
-    <div class="app">
-      <div class="greeting">
-        <h1 id="greeting-text">Good to see you</h1>
-        <p>Pick up where you left off, or start something new.</p>
-      </div>
+      <div class="app">
+        <div class="greeting">
+          <h1 id="greeting-text">Good to see you</h1>
+          <p>Pick up where you left off, or start something new.</p>
+        </div>
+
+        <div class="search-panel hidden" id="search-panel">
+          <input id="search-input" type="search" placeholder="Search lessons and courses" autocomplete="off">
+          <div class="search-results" id="search-results"></div>
+        </div>
 
       <div class="stat-row">
         <div class="stat"><p class="label">Courses in progress</p><p class="value" id="stat-inprogress">0</p></div>
@@ -354,19 +419,32 @@
         <div class="sidebar-head">
           <h2>Course content</h2>
           <div class="sidebar-tabs">
-            <button class="stab active">Lessons</button>
-            <button class="stab">Certificate</button>
-            <button class="stab">Cancel</button>
+            <button class="stab active" data-tab="lessons">Lessons</button>
+            <button class="stab" data-tab="certificate">Certificate</button>
+            <button class="stab" data-tab="notes">Notes</button>
           </div>
         </div>
         <div id="accordion-root"></div>
       </div>
 
       <div class="player-main">
-        <div class="video-frame" id="video-frame"></div>
-        <p class="watching-label">You are watching lesson</p>
-        <h1 class="lesson-heading" id="p-lesson-title">Lesson title</h1>
-        <p class="lesson-desc" id="p-lesson-desc"></p>
+        <div id="lesson-panel">
+          <div class="video-frame" id="video-frame"></div>
+          <p class="watching-label">You are watching lesson</p>
+          <h1 class="lesson-heading" id="p-lesson-title">Lesson title</h1>
+          <p class="lesson-desc" id="p-lesson-desc"></p>
+          <div class="lesson-actions">
+            <button class="lesson-action" id="btn-prev-lesson">Previous</button>
+            <button class="lesson-action primary" id="btn-mark-done">Mark complete</button>
+            <button class="lesson-action" id="btn-next-lesson">Next</button>
+          </div>
+          <div class="notes-panel">
+            <label for="lesson-notes">Lesson notes</label>
+            <textarea id="lesson-notes" placeholder="Save private notes for this lesson"></textarea>
+            <p class="notes-hint" id="notes-hint">Notes save automatically in this browser.</p>
+          </div>
+        </div>
+        <div id="certificate-panel" class="certificate-panel hidden"></div>
       </div>
     </div>
   </div>
@@ -397,10 +475,15 @@ const firebaseConfig = {
 
 let auth, db, firebaseReady = false;
 try {
-  const app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  firebaseReady = true;
+  const hasFirebaseConfig = Object.values(firebaseConfig).every(value => value && !String(value).includes("REPLACE_ME"));
+  if (hasFirebaseConfig) {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    firebaseReady = true;
+  } else {
+    console.info("Firebase not configured yet — running in local demo mode.");
+  }
 } catch (e) {
   console.warn("Firebase not configured yet — running in local demo mode.", e);
 }
@@ -508,6 +591,7 @@ let currentCourse = null;
 let currentLesson = { s: 0, l: 0 };
 let openSection = 0;
 let adminMode = false;
+let activeTab = "lessons";
 let editingLesson = null; // "sectionIdx-lessonIdx" of the lesson currently showing its input row, or null
 
 const $ = (id) => document.getElementById(id);
@@ -601,13 +685,13 @@ async function setVimeoId(courseId, s, l, vimeoId) {
 }
 
 /* ---------------- View transitions ---------------- */
-function enterApp() {
+async function enterApp() {
   $("view-login").classList.add("hidden");
   $("view-app").classList.remove("hidden");
   const emailStr = currentUser.email || "you";
   $("user-avatar").textContent = emailStr.slice(0,2).toUpperCase();
   $("greeting-text").textContent = "Good to see you, " + emailStr.split("@")[0];
-  loadVideoMap();
+  await loadVideoMap();
   renderDashboard();
 }
 
@@ -617,6 +701,34 @@ function totalLessons(course) {
 function doneLessons(course) {
   const done = (progressState[course.id] && progressState[course.id].done) || {};
   return Object.values(done).filter(Boolean).length;
+}
+
+function lessonKey(s, l) {
+  return s + "-" + l;
+}
+
+function userStorageSuffix() {
+  return currentUser && currentUser.uid ? currentUser.uid : "guest";
+}
+
+function notesStorageKey(courseId, s, l) {
+  return "woyz_notes_" + userStorageSuffix() + "_" + courseId + "_" + lessonKey(s, l);
+}
+
+function loadLessonNote(courseId, s, l) {
+  return localStorage.getItem(notesStorageKey(courseId, s, l)) || "";
+}
+
+function saveLessonNote(courseId, s, l, value) {
+  localStorage.setItem(notesStorageKey(courseId, s, l), value);
+}
+
+function flattenLessons(course) {
+  const items = [];
+  course.sections.forEach((section, s) => {
+    section.lessons.forEach((lesson, l) => items.push({ section, lesson, s, l }));
+  });
+  return items;
 }
 
 function renderDashboard() {
@@ -653,6 +765,40 @@ function renderDashboard() {
 
   $("view-course").classList.add("hidden");
   $("view-dashboard").classList.remove("hidden");
+  renderSearchResults();
+}
+
+function renderSearchResults() {
+  const input = $("search-input");
+  const results = $("search-results");
+  if (!input || !results) return;
+  const query = input.value.trim().toLowerCase();
+  results.innerHTML = "";
+  if (!query) {
+    results.innerHTML = `<p class="empty-state">Type a course, section, or lesson name.</p>`;
+    return;
+  }
+
+  const matches = [];
+  sampleCourses.forEach(course => {
+    flattenLessons(course).forEach(({ section, lesson, s, l }) => {
+      const haystack = [course.title, section.title, lesson.title].join(" ").toLowerCase();
+      if (haystack.includes(query)) matches.push({ course, section, lesson, s, l });
+    });
+  });
+
+  if (!matches.length) {
+    results.innerHTML = `<p class="empty-state">No matching lessons found.</p>`;
+    return;
+  }
+
+  matches.slice(0, 12).forEach(({ course, section, lesson, s, l }) => {
+    const item = document.createElement("button");
+    item.className = "search-result";
+    item.innerHTML = `<strong>${lesson.title}</strong><span>${course.title} · ${section.title}</span>`;
+    item.addEventListener("click", () => openCourse(course.id, s, l));
+    results.appendChild(item);
+  });
 }
 
 function isDone(courseId, s, l) {
@@ -669,11 +815,14 @@ function findFirstIncomplete(course) {
   return { s: 0, l: 0 };
 }
 
-function openCourse(courseId) {
+function openCourse(courseId, lessonSection, lessonIndex) {
   currentCourse = sampleCourses.find(c => c.id === courseId);
   if (!currentCourse) return;
-  currentLesson = findFirstIncomplete(currentCourse);
+  currentLesson = Number.isInteger(lessonSection) && Number.isInteger(lessonIndex)
+    ? { s: lessonSection, l: lessonIndex }
+    : findFirstIncomplete(currentCourse);
   openSection = currentLesson.s;
+  activeTab = "lessons";
   renderCoursePlayer();
   $("view-dashboard").classList.add("hidden");
   $("view-course").classList.remove("hidden");
@@ -682,16 +831,29 @@ function openCourse(courseId) {
 function selectLesson(s, l) {
   currentLesson = { s, l };
   openSection = s;
+  activeTab = "lessons";
   renderCoursePlayer();
 }
 
 async function markCurrentDone() {
   const cid = currentCourse.id;
   if (!progressState[cid]) progressState[cid] = { done: {} };
-  const key = currentLesson.s + "-" + currentLesson.l;
+  const key = lessonKey(currentLesson.s, currentLesson.l);
   progressState[cid].done[key] = true;
   await saveProgress();
   renderCoursePlayer();
+}
+
+function currentLessonIndex() {
+  return flattenLessons(currentCourse).findIndex(item => item.s === currentLesson.s && item.l === currentLesson.l);
+}
+
+function moveLesson(delta) {
+  const lessons = flattenLessons(currentCourse);
+  const nextIndex = currentLessonIndex() + delta;
+  if (nextIndex < 0 || nextIndex >= lessons.length) return;
+  const next = lessons[nextIndex];
+  selectLesson(next.s, next.l);
 }
 
 function renderCoursePlayer() {
@@ -709,6 +871,9 @@ function renderCoursePlayer() {
 
   const effectiveId = getVimeoId(course.id, currentLesson.s, currentLesson.l, lesson.vimeoId);
   renderVideoFrame(lesson, effectiveId);
+  renderLessonTools();
+  renderCourseTabs();
+  renderCertificatePanel();
 
   const root = $("accordion-root");
   root.innerHTML = "";
@@ -729,7 +894,7 @@ function renderCoursePlayer() {
         const d = isDone(course.id, si, li);
         const isCurrent = (si === currentLesson.s && li === currentLesson.l);
         const effectiveId = getVimeoId(course.id, si, li, lesson2.vimeoId);
-        const key = si + "-" + li;
+        const key = lessonKey(si, li);
         const isEditing = (editingLesson === key) || !effectiveId; // always open the input if there's no video yet
         const item = document.createElement("div");
         item.className = "lesson-item" + (isCurrent ? " current" : "");
@@ -785,6 +950,49 @@ function renderCoursePlayer() {
   });
 }
 
+function renderLessonTools() {
+  const lessons = flattenLessons(currentCourse);
+  const index = currentLessonIndex();
+  $("btn-prev-lesson").disabled = index <= 0;
+  $("btn-next-lesson").disabled = index >= lessons.length - 1;
+  $("btn-mark-done").textContent = isDone(currentCourse.id, currentLesson.s, currentLesson.l) ? "Completed" : "Mark complete";
+  $("lesson-notes").value = loadLessonNote(currentCourse.id, currentLesson.s, currentLesson.l);
+  $("notes-hint").textContent = "Notes save automatically in this browser.";
+}
+
+function renderCourseTabs() {
+  document.querySelectorAll(".stab").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.tab === activeTab);
+  });
+  $("accordion-root").classList.toggle("hidden", activeTab !== "lessons");
+  $("lesson-panel").classList.toggle("hidden", activeTab === "certificate");
+  $("certificate-panel").classList.toggle("hidden", activeTab !== "certificate");
+  if (activeTab === "notes") $("lesson-notes").focus();
+}
+
+function renderCertificatePanel() {
+  const total = totalLessons(currentCourse);
+  const done = doneLessons(currentCourse);
+  const pct = Math.round((done / total) * 100);
+  const name = currentUser.email ? currentUser.email.split("@")[0] : "Learner";
+  const completed = done === total;
+  $("certificate-panel").innerHTML = `
+    <div class="certificate-sheet">
+      <p class="eyebrow">${completed ? "Certificate of Completion" : "Certificate Locked"}</p>
+      <h1 class="serif">WOYZ Academy</h1>
+      <p>This certifies that</p>
+      <h2 class="serif">${name}</h2>
+      <p>${completed ? "has completed" : "is working through"} the course</p>
+      <h2 class="serif">${currentCourse.title}</h2>
+      <p>${completed ? "All lessons are complete." : pct + "% complete. Finish every lesson to unlock this certificate."}</p>
+    </div>
+    <div class="lesson-actions">
+      <button class="lesson-action primary" id="btn-print-certificate" ${completed ? "" : "disabled"}>Print certificate</button>
+    </div>
+  `;
+  $("btn-print-certificate").addEventListener("click", () => window.print());
+}
+
 function renderVideoFrame(lesson, effectiveId) {
   const frame = $("video-frame");
   if (effectiveId) {
@@ -824,6 +1032,28 @@ $("btn-admin").addEventListener("click", () => {
 });
 
 $("btn-back").addEventListener("click", renderDashboard);
+$("btn-prev-lesson").addEventListener("click", () => moveLesson(-1));
+$("btn-next-lesson").addEventListener("click", () => moveLesson(1));
+$("btn-mark-done").addEventListener("click", markCurrentDone);
+$("lesson-notes").addEventListener("input", () => {
+  if (!currentCourse) return;
+  saveLessonNote(currentCourse.id, currentLesson.s, currentLesson.l, $("lesson-notes").value);
+  $("notes-hint").textContent = "Saved.";
+});
+$("btn-search").addEventListener("click", () => {
+  $("search-panel").classList.toggle("hidden");
+  if (!$("search-panel").classList.contains("hidden")) {
+    $("search-input").focus();
+    renderSearchResults();
+  }
+});
+$("search-input").addEventListener("input", renderSearchResults);
+document.querySelectorAll(".stab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    activeTab = tab.dataset.tab;
+    renderCoursePlayer();
+  });
+});
 
 if (!firebaseReady) {
   $("login-sub").textContent = "Demo mode — Firebase not yet connected";

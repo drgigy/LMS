@@ -1,6 +1,6 @@
 # WOYZ Academy
 
-A single-file HTML learning platform for the "AI for Indian Doctors And Clinics (AIDC)" course — login, dashboard, and a course player with Vimeo video support.
+A single-file HTML learning platform for the "AI for Indian Doctors And Clinics (AIDC)" course — login, dashboard search, course player, lesson notes, progress tracking, completion certificate, and Vimeo video support.
 
 Everything lives in `index.html`. No build step, no dependencies to install — just deploy the file.
 
@@ -18,7 +18,7 @@ Drag the folder into [app.netlify.com/drop](https://app.netlify.com/drop), or co
 
 Open `index.html` and find the `firebaseConfig` object near the top of the `<script type="module">` block. Replace the `REPLACE_ME` placeholders with your Firebase project's web app config (Firebase console → Project settings → your app → SDK setup and configuration).
 
-Until you do this, the app still works fully in **local demo mode** — click "Continue with demo account" on login. Progress and videos save to the browser's localStorage instead of Firestore.
+Until you do this, the app still works fully in **local demo mode** — click "Continue with demo account" on login. Progress, notes, and videos save to the browser's localStorage instead of Firestore.
 
 Firestore collections used once connected:
 - `progress/{uid}` — per-user lesson completion
@@ -35,6 +35,13 @@ To make videos badge-free by default on Vimeo's side: create an embed preset (Ap
 ## 4. Course content
 
 The curriculum lives in the `sampleCourses` array in the script. To edit lesson titles, durations, or add a new section, edit that array directly — or migrate it to a Firestore `courses` collection if you want to edit content without touching code.
+
+## 5. Learner features
+
+- Use the dashboard search icon to find a course, section, or lesson and jump directly into the player.
+- Use Previous, Next, and Mark complete inside the course player to move through the course.
+- Lesson notes are private to the current browser and save automatically.
+- The Certificate tab unlocks printing once every lesson in the course is complete.
 
 ## Notes
 
