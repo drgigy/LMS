@@ -1,4 +1,4 @@
-# OEs Academy
+# WOYZ Academy
 
 A single-file HTML learning platform for the "AI for Indian Doctors And Clinics (AIDC)" course — email login/sign-up, dashboard search, subscription-ready course locking, course player, lesson notes, progress tracking, completion certificate, and Vimeo video support.
 

@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>OEs Academy</title>
+<title>WOYZ Academy</title>
 <meta name="theme-color" content="#12213D">
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiT0VzIEFjYWRlbXkiLCJzaG9ydF9uYW1lIjoiT0VzIEFjYWRlbXkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0Y1RUZFMCIsInRoZW1lX2NvbG9yIjoiIzEyMjEzRCJ9">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiV09ZWiBBY2FkZW15Iiwic2hvcnRfbmFtZSI6IldPWVogQWNhZGVteSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjRjVFRkUwIiwidGhlbWVfY29sb3IiOiIjMTIyMTNEIn0=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -361,8 +361,8 @@
 <!-- ================= LOGIN VIEW ================= -->
 <div id="view-login" class="login-wrap">
   <div class="login-card">
-    <div class="login-mark">OA</div>
-    <h1>OEs Academy</h1>
+    <div class="login-mark">WA</div>
+    <h1>WOYZ Academy</h1>
     <p class="login-sub" id="login-sub">Sign in to continue your learning</p>
 
     <div class="field">
@@ -390,8 +390,8 @@
   <div id="view-dashboard">
     <div class="topbar">
       <div class="brand">
-        <div class="mark">OA</div>
-        <span class="name serif">OEs Academy</span>
+        <div class="mark">WA</div>
+        <span class="name serif">WOYZ Academy</span>
       </div>
       <div class="topbar-right">
         <button class="icon-btn" id="btn-search" aria-label="Search">
@@ -431,7 +431,7 @@
   <div id="view-course" class="hidden">
     <div class="player-topbar">
       <div class="p-left">
-        <div class="mark">OA</div>
+        <div class="mark">WA</div>
         <span class="ptitle" id="p-course-title">Course title</span>
       </div>
       <div class="p-center" id="p-progress-text">0% completed (0/0)</div>
@@ -489,8 +489,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ---------------------------------------------------------------
-   TODO: replace with your OEs Academy Firebase web config
-   (Firebase console -> Project settings -> your OEs Academy project -> your web app)
+   TODO: replace with your WOYZ Academy Firebase web config
+   (Firebase console -> Project settings -> your WOYZ Academy project -> your web app)
 --------------------------------------------------------------- */
 const firebaseConfig = {
   apiKey: "REPLACE_ME",
@@ -644,7 +644,7 @@ const $ = (id) => document.getElementById(id);
 function setAuthMode(mode) {
   authMode = mode;
   $("btn-signin").textContent = mode === "signup" ? "Create account" : "Sign in";
-  $("login-sub").textContent = mode === "signup" ? "Create your OEs Academy account" : (firebaseReady ? "Sign in to continue your learning" : "Demo mode — Firebase not yet connected");
+  $("login-sub").textContent = mode === "signup" ? "Create your WOYZ Academy account" : (firebaseReady ? "Sign in to continue your learning" : "Demo mode — Firebase not yet connected");
   $("auth-mode-copy").textContent = mode === "signup" ? "Already registered?" : "New learner?";
   $("btn-auth-mode").textContent = mode === "signup" ? "Sign in" : "Create an account";
 }
@@ -714,7 +714,7 @@ async function loadProgress(uid) {
   } catch (e) { console.warn("Falling back to local progress", e); loadLocalProgress(); }
 }
 function loadLocalProgress() {
-  try { progressState = JSON.parse(localStorage.getItem("oes_progress") || "{}"); }
+  try { progressState = JSON.parse(localStorage.getItem("woyz_progress") || "{}"); }
   catch (e) { progressState = {}; }
 }
 async function saveProgress() {
@@ -722,7 +722,7 @@ async function saveProgress() {
     try { await setDoc(doc(db, "progress", currentUser.uid), progressState); return; }
     catch (e) { console.warn("Couldn't save to Firestore, saving locally instead", e); }
   }
-  localStorage.setItem("oes_progress", JSON.stringify(progressState));
+  localStorage.setItem("woyz_progress", JSON.stringify(progressState));
 }
 
 async function loadEnrollments(uid) {
@@ -746,7 +746,7 @@ function loadLocalEnrollments() {
     });
     return;
   }
-  try { enrollmentState = JSON.parse(localStorage.getItem("oes_enrollments") || "{}"); }
+  try { enrollmentState = JSON.parse(localStorage.getItem("woyz_enrollments") || "{}"); }
   catch (e) { enrollmentState = {}; }
 }
 function hasCourseAccess(courseId) {
@@ -774,7 +774,7 @@ async function loadVideoMap() {
   } catch (e) { console.warn("Falling back to local video map", e); loadLocalVideoMap(); }
 }
 function loadLocalVideoMap() {
-  try { videoMap = JSON.parse(localStorage.getItem("oes_videomap") || "{}"); }
+  try { videoMap = JSON.parse(localStorage.getItem("woyz_videomap") || "{}"); }
   catch (e) { videoMap = {}; }
 }
 async function saveVideoMap() {
@@ -785,7 +785,7 @@ async function saveVideoMap() {
     }
     catch (e) { console.warn("Couldn't save video map to Firestore, saving locally instead", e); }
   }
-  localStorage.setItem("oes_videomap", JSON.stringify(videoMap));
+  localStorage.setItem("woyz_videomap", JSON.stringify(videoMap));
 }
 function getVimeoId(courseId, s, l, fallback) {
   const map = videoMap[courseId];
@@ -828,7 +828,7 @@ function userStorageSuffix() {
 }
 
 function notesStorageKey(courseId, s, l) {
-  return "oes_notes_" + userStorageSuffix() + "_" + courseId + "_" + lessonKey(s, l);
+  return "woyz_notes_" + userStorageSuffix() + "_" + courseId + "_" + lessonKey(s, l);
 }
 
 function loadLessonNote(courseId, s, l) {
@@ -1148,7 +1148,7 @@ function renderCertificatePanel() {
   $("certificate-panel").innerHTML = `
     <div class="certificate-sheet">
       <p class="eyebrow">${completed ? "Certificate of Completion" : "Certificate Locked"}</p>
-      <h1 class="serif">OEs Academy</h1>
+      <h1 class="serif">WOYZ Academy</h1>
       <p>This certifies that</p>
       <h2 class="serif">${name}</h2>
       <p>${completed ? "has completed" : "is working through"} the course</p>
